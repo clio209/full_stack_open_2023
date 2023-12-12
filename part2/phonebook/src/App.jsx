@@ -58,6 +58,19 @@ const App = () => {
     setFilterName(event.target.value)
   }
 
+  const deletePerson = (id) => {
+    const person = persons.find(person => person.id === id)
+    const result = window.confirm(`Delete ${person.name} ?`)
+    if (result) {
+      axios
+      .delete(`http://localhost:3001/persons/${id}`)
+      .then(response => {
+        console.log(response)
+      })
+    }
+    setPersons(persons.filter(person => person.id !== id))
+  }
+
   return (
     <div>
       <h2>
@@ -81,6 +94,7 @@ const App = () => {
       <Persons 
         persons={persons} 
         filterName={filterName} 
+        deletePerson={deletePerson}
       />
     </div>
   )

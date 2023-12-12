@@ -1,11 +1,16 @@
 import axios from 'axios'
 const baseUrl = 'http://localhost:3001/persons'
 
-const Persons = ({ persons, filterName }) => {
+const Persons = ({ persons, filterName, deletePerson }) => {
   const filteredPersons = persons.filter(person => person.name.includes(filterName))
   return (
     <div>
-      {filteredPersons.map(person => <p key={person.id}>{person.name} {person.number}</p>)}
+      {filteredPersons.map(person => (
+      <div key={person.id}>
+        <p>{person.name} {person.number} </p>
+      <button onClick={() => deletePerson(person.id)}>delete</button>
+      </div>
+      ))}
     </div>
   );
 }
