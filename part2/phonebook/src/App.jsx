@@ -27,12 +27,19 @@ const App = () => {
       name: newName,
       number: newNumber
     }
+
     // 同じ名前の人がいるかどうかを確認する
     const isSameName = persons.some(person => person.name === newName)
     if (isSameName) {
       alert(newName + 'is already added to phonebook')
       return
     }
+
+    axios
+    .post('http://localhost:3001/persons', personObject)
+    .then(response => {
+      console.log(response)
+    })
 
     setPersons(persons.concat(personObject))
     setNewName('')
