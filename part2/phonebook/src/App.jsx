@@ -3,6 +3,7 @@ import './components/Filter.jsx'
 import Filter from './components/Filter.jsx'
 import PersonForm from './components/PersonForm.jsx'
 import Persons from './components/Persons.jsx'
+import { create, update } from './components/Persons.jsx'
 import axios from 'axios'
 
 const App = () => {
@@ -28,22 +29,23 @@ const App = () => {
       number: newNumber
     }
 
-    // 同じ名前の人がいるかどうかを確認する
+    // 同じ名前の場合、電話番号を変更するかどうかを確認する
     const isSameName = persons.some(person => person.name === newName)
-    if (isSameName) {
-      alert(newName + 'is already added to phonebook')
+    if (!isSameName) {
+      create(personObject)
+      setPersons(persons.concat(personObject))
+      setNewName('')
+      setNewNumber('')
       return
     }
-
-    axios
-    .post('http://localhost:3001/persons', personObject)
-    .then(response => {
-      console.log(response)
-    })
-
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
+    const result = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+    if (isSameName && result) {
+      const person = persons.find(person => person.name === newName)
+      changeNumber(person.id)
+      return
+    } else if (isSameName && !result) {
+      return
+    }
   }
 
   const handlePersonChange = (event) => {
@@ -69,6 +71,18 @@ const App = () => {
       })
     }
     setPersons(persons.filter(person => person.id !== id))
+  }
+
+  // 名前がすでに存在する人の電話番号を変更する関数
+  const changeNumber = (id) => {
+    const person = persons.find(person => person.id === id)
+    const changedPerson = {...person, number: newNumber}
+    update(
+      id,
+      changedPerson
+    ).then(returnedPerson => {
+      setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+    })
   }
 
   return (
