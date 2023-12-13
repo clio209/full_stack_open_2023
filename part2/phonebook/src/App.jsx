@@ -11,6 +11,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilterName] = useState('')
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
 
   useEffect(() => {
     axios
@@ -33,6 +35,11 @@ const App = () => {
     const isSameName = persons.some(person => person.name === newName)
     if (!isSameName) {
       create(personObject)
+      setMessage(`Added ${newName}`)
+      setMessageType('success')
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
       setPersons(persons.concat(personObject))
       setNewName('')
       setNewNumber('')
@@ -42,6 +49,11 @@ const App = () => {
     if (isSameName && result) {
       const person = persons.find(person => person.name === newName)
       changeNumber(person.id)
+      setMessage(`Changed ${newName}'s number`)
+      setMessageType('success')
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
       return
     } else if (isSameName && !result) {
       return
@@ -71,18 +83,55 @@ const App = () => {
       })
     }
     setPersons(persons.filter(person => person.id !== id))
+    setMessage(`Deleted ${person.name}`)
+    setMessageType('success')
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   // 名前がすでに存在する人の電話番号を変更する関数
   const changeNumber = (id) => {
     const person = persons.find(person => person.id === id)
     const changedPerson = {...person, number: newNumber}
-    update(
-      id,
-      changedPerson
-    ).then(returnedPerson => {
+
+    update(id, changedPerson)
+    .then(returnedPerson => {
       setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
     })
+    .catch(error => {
+      if(person) {
+      setMessage('Information of ${person.name} has already been removed from server')
+      setMessageType('error')
+      } else {
+        setMessage('Person not found')
+        setMessageType('error')
+      }
+      setTimeout(() => {
+        setMessage(null)
+      }
+      , 5000)
+      setPersons(persons.filter(person => person.id !== id))
+    }
+    )
+  }
+
+  const Footer = () => {
+    const footerStyle = {
+      color: messageType === 'success' ? 'green' : 'red',
+      fontStyle: 'italic',
+      fontSize: 16,
+      borderStyle: 'solid',
+      borderRadius: 5,
+      padding: 10,
+      borderColor: 'green',
+      backgroundColor: 'lightgrey'
+    }
+    return(
+      <div>
+        {message && <div style={footerStyle} className="message">{message}</div>}
+      </div>
+    )
   }
 
   return (
@@ -90,6 +139,7 @@ const App = () => {
       <h2>
         Phonebook
       </h2>
+      <Footer />
       <Filter 
         filterName={filterName}
         filterNameChange={filterNameChange} 
